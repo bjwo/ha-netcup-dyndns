@@ -1,0 +1,48 @@
+name: "Netcup Dynamic DNS"
+description: "Automatically update netcup DNS records with your current public IP address (IPv4/IPv6)"
+url: "https://github.com/bjwo/ha-netcup-dyndns"
+version: "6.1"
+slug: "netcup-dyndns"
+arch:
+  - amd64
+  - aarch64
+  - armv7
+init: true
+ipv6: true
+host_network: true
+startup: services
+boot: auto
+map:
+  - share:rw
+options:
+  customer_number: ""
+  api_key: ""
+  api_password: ""
+  domains:
+    - domain: "example.com"
+      hosts: "@, www"
+  use_ipv4: true
+  use_ipv6: false
+  change_ttl: true
+  cron_schedule: "*/5 * * * *"
+  ipv4_address_url: "https://get-ipv4.steck.cc"
+  ipv4_address_url_fallback: "https://ipv4.seeip.org"
+  ipv6_address_url: "https://get-ipv6.steck.cc"
+  ipv6_address_url_fallback: "https://v6.ident.me"
+  jitter_max: 30
+schema:
+  customer_number: "str?"
+  api_key: "password?"
+  api_password: "password?"
+  domains:
+    - domain: str
+      hosts: str
+  use_ipv4: bool
+  use_ipv6: bool
+  change_ttl: bool
+  cron_schedule: str
+  ipv4_address_url: url
+  ipv4_address_url_fallback: url
+  ipv6_address_url: url
+  ipv6_address_url_fallback: url
+  jitter_max: "int(0,300)"

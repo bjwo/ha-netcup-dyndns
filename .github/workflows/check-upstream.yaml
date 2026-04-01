@@ -1,0 +1,65 @@
+name: Check for upstream updates
+
+on:
+  schedule:
+    - cron: "23 8 * * *"
+  workflow_dispatch:
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get current upstream version
+        id: current
+        run: |
+          CURRENT=$(grep -m1 'stecklars/dynamic-dns-netcup-api:' netcup-dyndns/build.yaml | sed 's/.*://')
+          echo "version=$CURRENT" >> "$GITHUB_OUTPUT"
+
+      - name: Get latest upstream release
+        id: latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST=$(gh api repos/stecklars/dynamic-dns-netcup-api/releases/latest --jq '.tag_name')
+          echo "version=$LATEST" >> "$GITHUB_OUTPUT"
+
+      - name: Update if new version available
+        if: steps.current.outputs.version != steps.latest.outputs.version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT: ${{ steps.current.outputs.version }}
+          LATEST: ${{ steps.latest.outputs.version }}
+        run: |
+          # Derive addon version from upstream tag (strip leading 'v' if present)
+          ADDON_VERSION="${LATEST#v}"
+
+          # Update build.yaml
+          sed -i "s|stecklars/dynamic-dns-netcup-api:${CURRENT}|stecklars/dynamic-dns-netcup-api:${LATEST}|g" netcup-dyndns/build.yaml
+
+          # Update addon version in config.yaml
+          sed -i "s|^version:.*|version: \"${ADDON_VERSION}\"|" netcup-dyndns/config.yaml
+
+          # Create branch and PR
+          BRANCH="update-upstream-${LATEST}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add netcup-dyndns/build.yaml netcup-dyndns/config.yaml
+          git commit -m "Update upstream image to ${LATEST}"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --title "Update upstream image to ${LATEST}" \
+            --body "$(cat <<EOF
+          A new version of [dynamic-dns-netcup-api](https://github.com/stecklars/dynamic-dns-netcup-api) has been released.
+
+          - **Current version:** ${CURRENT}
+          - **New version:** ${LATEST}
+          - **Release notes:** https://github.com/stecklars/dynamic-dns-netcup-api/releases/tag/${LATEST}
+
+          This PR updates the base image in \`build.yaml\` and bumps the addon version in \`config.yaml\`.
+          EOF
+          )"
