@@ -1,0 +1,48 @@
+name: Auto Release
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'update-upstream-')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Extract version
+        id: get_version
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          VERSION="${BRANCH_NAME#update-upstream-}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch upstream notes
+        id: fetch_notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.get_version.outputs.version }}
+        run: |
+          NOTES=$(gh api repos/stecklars/dynamic-dns-netcup-api/releases/tags/$VERSION --jq '.body')
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "notes<<$EOF" >> "$GITHUB_OUTPUT"
+          echo "$NOTES" >> "$GITHUB_OUTPUT"
+          echo "$EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          body: |
+            ## Upstream Changelog
+            ${{ steps.fetch_notes.outputs.notes }}
+            
+            ---
+            See the [upstream release](https://github.com/stecklars/dynamic-dns-netcup-api/releases/tag/${{ steps.get_version.outputs.version }}) for more details.
