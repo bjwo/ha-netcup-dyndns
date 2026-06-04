@@ -57,16 +57,13 @@ jobs:
           if ! gh pr list --head "$BRANCH" --json number --jq 'length' | grep -q "^[1-9]"; then
             gh pr create \
               --title "Update upstream image to ${LATEST}" \
-              --body "$(cat <<EOF
-          A new version of [dynamic-dns-netcup-api](https://github.com/stecklars/dynamic-dns-netcup-api) has been released.
+              --body "A new version of [dynamic-dns-netcup-api](https://github.com/stecklars/dynamic-dns-netcup-api) has been released.
 
-          - **Current version:** ${CURRENT}
-          - **New version:** ${LATEST}
-          - **Release notes:** https://github.com/stecklars/dynamic-dns-netcup-api/releases/tag/${LATEST}
+- **Current version:** ${CURRENT}
+- **New version:** ${LATEST}
+- **Release notes:** https://github.com/stecklars/dynamic-dns-netcup-api/releases/tag/${LATEST}
 
-          This PR updates the base image in \`build.yaml\` and bumps the addon version in \`config.yaml\`.
-          EOF
-          )"
+This PR updates the base image in \`build.yaml\` and bumps the addon version in \`config.yaml\`." || { echo "gh pr create failed!"; exit 1; }
           else
             echo "PR for branch $BRANCH already exists."
           fi
