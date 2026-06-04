@@ -8,6 +8,9 @@ on:
 jobs:
   check-update:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,11 +52,12 @@ jobs:
           git checkout -b "$BRANCH"
           git add netcup-dyndns/build.yaml netcup-dyndns/config.yaml
           git commit -m "Update upstream image to ${LATEST}"
-          git push origin "$BRANCH"
+          git push -f origin "$BRANCH"
 
-          gh pr create \
-            --title "Update upstream image to ${LATEST}" \
-            --body "$(cat <<EOF
+          if ! gh pr list --head "$BRANCH" --json number --jq 'length' | grep -q "^[1-9]"; then
+            gh pr create \
+              --title "Update upstream image to ${LATEST}" \
+              --body "$(cat <<EOF
           A new version of [dynamic-dns-netcup-api](https://github.com/stecklars/dynamic-dns-netcup-api) has been released.
 
           - **Current version:** ${CURRENT}
@@ -63,3 +67,6 @@ jobs:
           This PR updates the base image in \`build.yaml\` and bumps the addon version in \`config.yaml\`.
           EOF
           )"
+          else
+            echo "PR for branch $BRANCH already exists."
+          fi
