@@ -5,10 +5,15 @@ on:
       - closed
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g. v6.2.1)'
+        required: true
 
 jobs:
   release:
-    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'update-upstream-')
+    if: (github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'update-upstream-')) || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -19,8 +24,12 @@ jobs:
       - name: Extract version
         id: get_version
         run: |
-          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
-          VERSION="${BRANCH_NAME#update-upstream-}"
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+            VERSION="${BRANCH_NAME#update-upstream-}"
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Fetch upstream notes
