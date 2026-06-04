@@ -1,5 +1,7 @@
 # Netcup Dynamic DNS - Home Assistant App
 
+[![Open your Home Assistant instance and show the add-on store.](https://my.home-assistant.io/badges/supervisor_store.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fbjwo%2Fha-netcup-dyndns)
+
 A Home Assistant app that automatically updates your [netcup](https://www.netcup.de) DNS records with your current public IP address. Supports both IPv4 (A records) and IPv6 (AAAA records).
 
 This app wraps the excellent [dynamic-dns-netcup-api](https://github.com/stecklars/dynamic-dns-netcup-api) by [@stecklars](https://github.com/stecklars) into a Home Assistant app, so you can manage your dynamic DNS directly from your Home Assistant instance without needing a separate Docker container or cron job.
