@@ -5,6 +5,9 @@ on:
     - cron: "23 8 * * *"
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   check-update:
     runs-on: ubuntu-latest
@@ -36,6 +39,7 @@ jobs:
           CURRENT: ${{ steps.current.outputs.version }}
           LATEST: ${{ steps.latest.outputs.version }}
         run: |
+          set -x
           # Derive addon version from upstream tag (strip leading 'v' if present)
           ADDON_VERSION="${LATEST#v}"
 
@@ -51,10 +55,18 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
           git add netcup-dyndns/build.yaml netcup-dyndns/config.yaml
+          
+          # Only commit if there are changes
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          
           git commit -m "Update upstream image to ${LATEST}"
           git push -f origin "$BRANCH"
 
           if ! gh pr list --head "$BRANCH" --json number --jq 'length' | grep -q "^[1-9]"; then
+            echo "Attempting to create PR..."
             gh pr create \
               --title "Update upstream image to ${LATEST}" \
               --body "A new version of [dynamic-dns-netcup-api](https://github.com/stecklars/dynamic-dns-netcup-api) has been released.
@@ -63,7 +75,11 @@ jobs:
           - **New version:** ${LATEST}
           - **Release notes:** https://github.com/stecklars/dynamic-dns-netcup-api/releases/tag/${LATEST}
 
-          This PR updates the base image in \`build.yaml\` and bumps the addon version in \`config.yaml\`." || { echo "gh pr create failed!"; exit 1; }
+          This PR updates the base image in \`build.yaml\` and bumps the addon version in \`config.yaml\`." || { 
+              echo "ERROR: gh pr create failed!"
+              echo "Did you enable 'Allow GitHub Actions to create and approve pull requests' in Settings > Actions > General?"
+              exit 1
+            }
           else
             echo "PR for branch $BRANCH already exists."
           fi
