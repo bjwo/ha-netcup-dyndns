@@ -52,12 +52,22 @@ jobs:
           # Update addon version in config.yaml
           sed -i "s|^version:.*|version: \"${ADDON_VERSION}\"|" netcup-dyndns/config.yaml
 
+          # Update CHANGELOG.md
+          echo "# Changelog" > tmp_changelog.md
+          echo "" >> tmp_changelog.md
+          echo "## ${ADDON_VERSION}" >> tmp_changelog.md
+          echo "" >> tmp_changelog.md
+          echo "$NOTES" >> tmp_changelog.md
+          echo "" >> tmp_changelog.md
+          tail -n +3 netcup-dyndns/CHANGELOG.md >> tmp_changelog.md
+          mv tmp_changelog.md netcup-dyndns/CHANGELOG.md
+
           # Create branch and PR
           BRANCH="update-upstream-${LATEST}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git add netcup-dyndns/build.yaml netcup-dyndns/config.yaml
+          git add netcup-dyndns/build.yaml netcup-dyndns/config.yaml netcup-dyndns/CHANGELOG.md
           
           # Only commit if there are changes
           if git diff --cached --quiet; then
