@@ -1,5 +1,16 @@
 # Changelog
 
+## 7.0.0
+
+Based on [dynamic-dns-netcup-api v7.0.0](https://github.com/stecklars/dynamic-dns-netcup-api/releases/tag/v7.0.0).
+
+**New features:**
+* **CloudDNS support.** New `clouddns_domains` and `clouddns_dyndns_apikey` options for domains managed through netcup's new CloudDNS system. Mixed setups (some classic, some CloudDNS) work in a single run.
+* **Pure-CloudDNS setups** no longer require `customer_number`, `api_key`, or `api_password`.
+
+**Changes:**
+* `customer_number`, `api_key`, `api_password`, and `domains` are now optional — required only when using classic CCP DNS domains.
+
 ## 6.2.1
 
 Hotfix release on top of v6.2.

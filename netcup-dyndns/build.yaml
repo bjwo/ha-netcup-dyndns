@@ -1,4 +1,4 @@
 build_from:
-  amd64: stecklars/dynamic-dns-netcup-api:v6.2.1
-  aarch64: stecklars/dynamic-dns-netcup-api:v6.2.1
-  armv7: stecklars/dynamic-dns-netcup-api:v6.2.1
+  amd64: stecklars/dynamic-dns-netcup-api:v7.0.0
+  aarch64: stecklars/dynamic-dns-netcup-api:v7.0.0
+  armv7: stecklars/dynamic-dns-netcup-api:v7.0.0

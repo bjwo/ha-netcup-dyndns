@@ -8,13 +8,19 @@ This app wraps the excellent [dynamic-dns-netcup-api](https://github.com/steckla
 
 ## Prerequisites
 
-You need the following from your netcup account:
+netcup is migrating domains to a new **CloudDNS** system. Which credentials you need depends on which system your domains use — check in the CCP under *Domains* by clicking the magnifier icon: a **CloudDNS** tab means CloudDNS, a **DNS** tab means classic.
 
-1. **Customer number** - Your netcup customer ID
-2. **API key** - Generate one in the [netcup Customer Control Panel (CCP)](https://ccp.netcup.net) under "Master data" > "API"
-3. **API password** - Generated together with the API key
+**Classic CCP DNS domains** (domains with a "DNS" tab in the CCP):
+1. **Customer number** — your netcup customer ID
+2. **Legacy API key** — generate in the [CCP](https://ccp.netcup.net) under "Master data" > "API" > "Legacy-API-Keys"
+3. **API password** — generated together with the Legacy API key
 
-Your DNS zone must already exist in netcup's DNS settings, and the records you want to update (A/AAAA) should be created beforehand.
+**CloudDNS domains** (domains with a "CloudDNS" tab in the CCP):
+1. **API key** — generate in the [CCP](https://ccp.netcup.net) under "Master data" > "API" > "API-Keys" (not the Legacy key)
+
+Mixed setups (some classic, some CloudDNS) work in a single addon run.
+
+Your DNS zone must already exist in netcup's DNS settings. Records that don't exist yet will be created automatically.
 
 ## Installation
 
@@ -32,14 +38,28 @@ Your DNS zone must already exist in netcup's DNS settings, and the records you w
 
 Configuration is done through the Home Assistant UI - no need to manually edit a `config.php` file as with the standalone Docker image.
 
-### Required options
+### Classic CCP DNS domains
+
+Required when using `domains` (classic netcup DNS API):
 
 | Option | Description |
 |--------|-------------|
 | `customer_number` | Your netcup customer number (e.g. `12345`) |
-| `api_key` | Your netcup API key |
+| `api_key` | Your netcup Legacy API key |
 | `api_password` | Your netcup API password |
 | `domains` | List of domain entries to update (see below) |
+
+### CloudDNS domains
+
+Required when using `clouddns_domains` (netcup CloudDNS DynDNS API):
+
+| Option | Description |
+|--------|-------------|
+| `clouddns_domains` | List of CloudDNS-managed domain entries to update (same format as `domains`) |
+| `clouddns_dyndns_apikey` | Your netcup API key (from "API-Keys", not "Legacy-API-Keys") |
+| `clouddns_dyndns_apiurl` | *(Optional)* Override the CloudDNS DynDNS endpoint URL |
+
+At least one of `domains` or `clouddns_domains` must be configured.
 
 ### Domains
 
