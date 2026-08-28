@@ -43,8 +43,8 @@ jobs:
           NOTES: ${{ steps.latest.outputs.notes }}
         run: |
           set -x
-          # Derive addon version from upstream tag (strip leading 'v' if present)
-          ADDON_VERSION="${LATEST#v}"
+          # Derive addon version: {upstream}.0 (local patch reserved as .1, .2, etc.)
+          ADDON_VERSION="${LATEST#v}.0"
 
           # Update build.yaml
           sed -i "s|stecklars/dynamic-dns-netcup-api:${CURRENT}|stecklars/dynamic-dns-netcup-api:${LATEST}|g" netcup-dyndns/build.yaml

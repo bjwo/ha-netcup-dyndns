@@ -1,11 +1,6 @@
 # Changelog
 
-## 7.0.1
-
-**Bugfix:**
-* Remove `clouddns_dyndns_apikey` and `clouddns_dyndns_apiurl` from default options — empty string defaults failed HA's `url?` / `password?` schema validation on install.
-
-## 7.0.0
+## 7.0.0.1
 
 Based on [dynamic-dns-netcup-api v7.0.0](https://github.com/stecklars/dynamic-dns-netcup-api/releases/tag/v7.0.0).
 
@@ -15,6 +10,9 @@ Based on [dynamic-dns-netcup-api v7.0.0](https://github.com/stecklars/dynamic-dn
 
 **Changes:**
 * `customer_number`, `api_key`, `api_password`, and `domains` are now optional — required only when using classic CCP DNS domains.
+
+**Bugfix:**
+* Remove `clouddns_dyndns_apikey` and `clouddns_dyndns_apiurl` from default options — empty string defaults failed HA's `url?` / `password?` schema validation on install.
 
 ## 6.2.1
 

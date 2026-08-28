@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g. v6.2.1)'
+        description: 'Upstream version to release (e.g. v7.0.1)'
         required: true
 
 jobs:
@@ -26,20 +26,22 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             INPUT_VERSION="${{ github.event.inputs.version }}"
-            VERSION="v${INPUT_VERSION#v}"
+            UPSTREAM_VERSION="v${INPUT_VERSION#v}"
           else
             BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
-            VERSION="${BRANCH_NAME#update-upstream-}"
+            UPSTREAM_VERSION="${BRANCH_NAME#update-upstream-}"
           fi
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          ADDON_VERSION="${UPSTREAM_VERSION#v}.0"
+          echo "upstream_version=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
+          echo "addon_version=$ADDON_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Fetch upstream notes
         id: fetch_notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ steps.get_version.outputs.version }}
+          UPSTREAM_VERSION: ${{ steps.get_version.outputs.upstream_version }}
         run: |
-          NOTES=$(gh api repos/stecklars/dynamic-dns-netcup-api/releases/tags/$VERSION --jq '.body')
+          NOTES=$(gh api repos/stecklars/dynamic-dns-netcup-api/releases/tags/$UPSTREAM_VERSION --jq '.body')
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "notes<<$EOF" >> "$GITHUB_OUTPUT"
           echo "$NOTES" >> "$GITHUB_OUTPUT"
@@ -48,11 +50,11 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ steps.get_version.outputs.version }}
-          name: Release ${{ steps.get_version.outputs.version }}
+          tag_name: v${{ steps.get_version.outputs.addon_version }}
+          name: Release v${{ steps.get_version.outputs.addon_version }}
           body: |
             ## Upstream Changelog
             ${{ steps.fetch_notes.outputs.notes }}
-            
+
             ---
-            See the [upstream release](https://github.com/stecklars/dynamic-dns-netcup-api/releases/tag/${{ steps.get_version.outputs.version }}) for more details.
+            See the [upstream release](https://github.com/stecklars/dynamic-dns-netcup-api/releases/tag/${{ steps.get_version.outputs.upstream_version }}) for more details.
