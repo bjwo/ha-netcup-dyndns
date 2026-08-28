@@ -1,7 +1,7 @@
 name: "Netcup Dynamic DNS"
 description: "Automatically update netcup DNS records with your current public IP address (IPv4/IPv6)"
 url: "https://github.com/bjwo/ha-netcup-dyndns"
-version: "7.0.0"
+version: "7.0.1"
 slug: "netcup-dyndns"
 arch:
   - amd64
@@ -20,8 +20,6 @@ options:
   api_password: ""
   domains: []
   clouddns_domains: []
-  clouddns_dyndns_apikey: ""
-  clouddns_dyndns_apiurl: ""
   use_ipv4: true
   use_ipv6: false
   change_ttl: true
