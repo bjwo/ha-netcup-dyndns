@@ -1,4 +1,5 @@
 name: Check for upstream updates
+# re-register triggers
 
 on:
   schedule:
