@@ -1,5 +1,12 @@
 # Changelog
 
+## 7.0.1.0
+
+Security: the Docker image is rebuilt on PHP 8.5.12, which fixes the "php2shell" vulnerabilities (CVE-2026-109618, CVE-2026-109619). This container only runs PHP from the command line and doesn't serve HTTP requests, which the published attacks rely on, so the practical risk was low. Updating is still recommended. (#45)
+
+- Docker builds now always pull the latest base image, and a manual rebuild workflow lets base-image security updates be shipped without a code change.
+- No changes to the update script itself. If you don't use Docker, you don't need to do anything.
+
 ## 7.0.0.1
 
 Based on [dynamic-dns-netcup-api v7.0.0](https://github.com/stecklars/dynamic-dns-netcup-api/releases/tag/v7.0.0).
